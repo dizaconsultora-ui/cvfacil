@@ -3,12 +3,18 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+defaults:
+  run:
+    working-directory: cv-facil-android
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
       - name: 1 Descargar proyecto
         uses: actions/checkout@v5
+      - name: 1b Descomprimir zip
+        working-directory: .
+        run: unzip -q -o cv-facil-android.zip
       - name: 2 Instalar Node
         uses: actions/setup-node@v5
         with: { node-version: 22 }
@@ -22,7 +28,7 @@ jobs:
       - name: 6 Sincronizar
         run: npx cap sync android
       - name: 7 Compilar APK
-        working-directory: android
+        working-directory: cv-facil-android/android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
@@ -30,4 +36,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CV-Facil-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: cv-facil-android/android/app/build/outputs/apk/debug/app-debug.apk
