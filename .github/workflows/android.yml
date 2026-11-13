@@ -1,34 +1,33 @@
-name: Android APK
-
+name: Crear APK
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches: [main]
   workflow_dispatch:
-
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
     steps:
-      - name: Descargar repositorio
-        uses: actions/checkout@v4
-
-      - name: Configurar Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-
-      - name: Dar permisos a Gradle
-        run: chmod +x gradlew
-
-      - name: Generar APK
-        run: ./gradlew assembleDebug
-
-      - name: Guardar APK
+      - name: 1 Descargar proyecto
+        uses: actions/checkout@v5
+      - name: 2 Instalar Node
+        uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - name: 3 Instalar Java
+        uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: 17 }
+      - name: 4 Instalar dependencias
+        run: npm install --no-audit --no-fund
+      - name: 5 Agregar Android
+        run: npx cap add android
+      - name: 6 Sincronizar
+        run: npx cap sync android
+      - name: 7 Compilar APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+      - name: 8 Guardar APK
         uses: actions/upload-artifact@v4
         with:
-          name: CVFacil-APK
-          path: "**/build/outputs/apk/debug/*.apk"
+          name: CV-Facil-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
